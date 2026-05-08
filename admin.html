@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard — Pro Task Runner Services</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --purple:#3d1e6d;--purple-mid:#5a2d9c;--purple-light:#7b4fc4;
+  --gold:#f5a623;--gold-dark:#c8841a;
+  --dark:#0d0b14;--dark2:#13101e;--dark3:#1a1630;
+  --white:#fff;--muted:rgba(255,255,255,0.55);
+  --border:rgba(255,255,255,0.08);
+  --green:#22c55e;--blue:#3b82f6;--red:#ef4444;--orange:#f97316;
+}
+html{height:100%}
+body{font-family:'Barlow',sans-serif;background:var(--dark);color:var(--white);min-height:100vh;display:flex;flex-direction:column}
+
+/* LOGIN SCREEN */
+#loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#08060f,#1a0a3a);display:flex;align-items:center;justify-content:center;z-index:999}
+.login-box{background:var(--dark2);border:1px solid rgba(245,166,35,0.3);border-radius:8px;padding:48px 40px;width:360px;text-align:center}
+.login-box img{height:80px;margin-bottom:20px}
+.login-box h2{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;margin-bottom:6px}
+.login-box p{color:var(--muted);font-size:14px;margin-bottom:28px}
+.login-box input{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:3px;padding:13px 16px;color:var(--white);font-size:20px;text-align:center;letter-spacing:8px;outline:none;margin-bottom:16px}
+.login-box input:focus{border-color:var(--gold)}
+.login-box button{width:100%;background:var(--gold);color:var(--dark);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;letter-spacing:2px;text-transform:uppercase;border:none;padding:14px;border-radius:3px;cursor:pointer}
+.login-box button:hover{background:var(--gold-dark)}
+.login-err{color:#ef4444;font-size:13px;margin-top:10px;display:none}
+
+/* LAYOUT */
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--dark2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-logo{padding:20px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sidebar-logo img{height:40px;width:40px;object-fit:contain}
+.sidebar-logo-text{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;line-height:1.1}
+.sidebar-logo-text span{color:var(--gold);font-size:10px;letter-spacing:2px;display:block}
+
+nav.sidenav{flex:1;padding:12px 0;overflow-y:auto}
+.sidenav a{display:flex;align-items:center;gap:10px;padding:11px 18px;color:rgba(255,255,255,0.65);font-size:14px;font-weight:600;text-decoration:none;transition:all .2s;cursor:pointer;border-left:3px solid transparent}
+.sidenav a:hover{background:rgba(255,255,255,0.04);color:var(--white)}
+.sidenav a.active{background:rgba(245,166,35,0.08);color:var(--gold);border-left-color:var(--gold)}
+.sidenav a .nav-icon{font-size:18px;width:22px;text-align:center}
+.sidenav .badge{margin-left:auto;background:var(--gold);color:var(--dark);font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;min-width:20px;text-align:center}
+
+.sidebar-footer{padding:16px 18px;border-top:1px solid var(--border)}
+.sidebar-footer a{color:var(--muted);font-size:12px;text-decoration:none;display:block;margin-bottom:6px}
+.sidebar-footer a:hover{color:var(--gold)}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+.topbar{height:58px;background:var(--dark2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;flex-shrink:0}
+.topbar h1{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;flex:1}
+.topbar-actions{display:flex;gap:10px;align-items:center}
+.btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:8px 18px;border-radius:2px;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all .2s}
+.btn-gold{background:var(--gold);color:var(--dark)}
+.btn-gold:hover{background:var(--gold-dark)}
+.btn-outline{background:transparent;color:var(--white);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-green{background:rgba(34,197,94,0.15);color:var(--green);border:1px solid rgba(34,197,94,0.3)}
+.btn-red{background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
+.btn-blue{background:rgba(59,130,246,0.1);color:var(--blue);border:1px solid rgba(59,130,246,0.2)}
+.btn-purple{background:rgba(90,45,156,0.3);color:#c084fc;border:1px solid rgba(139,92,246,0.3)}
+
+.content{flex:1;overflow-y:auto;padding:24px}
+
+/* PANELS */
+.panel{display:none}
+.panel.active{display:block}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--dark2);border:1px solid var(--border);border-radius:4px;padding:20px;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
+.stat-card.gold::after{background:var(--gold)}
+.stat-card.green::after{background:var(--green)}
+.stat-card.blue::after{background:var(--blue)}
+.stat-card.purple::after{background:var(--purple-light)}
+.stat-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.stat-value{font-family:'Bebas Neue',sans-serif;font-size:42px;line-height:1}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* JOBS BOARD */
+.board{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;min-height:400px}
+.board-col{background:var(--dark2);border-radius:4px;border:1px solid var(--border);display:flex;flex-direction:column}
+.board-col-header{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.board-col-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:1px;text-transform:uppercase}
+.col-count{font-size:11px;background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:10px}
+.board-col-body{padding:10px;flex:1;display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:480px}
+
+.job-card{background:var(--dark3);border:1px solid var(--border);border-radius:4px;padding:12px;cursor:pointer;transition:border-color .2s}
+.job-card:hover{border-color:var(--gold)}
+.job-card-service{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.5px;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.job-card-client{font-weight:600;font-size:14px;margin-bottom:2px}
+.job-card-meta{font-size:11px;color:var(--muted);line-height:1.5}
+.job-card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.status-badge{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:2px}
+.paid-badge{font-size:10px;font-weight:700;color:var(--green)}
+
+/* TABLE */
+.table-wrap{background:var(--dark2);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:20px}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--border)}
+th{padding:11px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-align:left}
+td{padding:11px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(255,255,255,0.02)}
+
+/* RUNNER CARDS */
+.runners-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.runner-card{background:var(--dark2);border:1px solid var(--border);border-radius:4px;padding:20px}
+.runner-card-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.runner-avatar{width:44px;height:44px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;font-family:'Barlow Condensed',sans-serif;flex-shrink:0}
+.runner-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:17px;text-transform:uppercase}
+.runner-phone{font-size:12px;color:var(--muted)}
+.runner-stats{display:flex;gap:12px;margin-bottom:12px}
+.runner-stat{flex:1;background:var(--dark3);border-radius:3px;padding:8px;text-align:center}
+.runner-stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;color:var(--gold)}
+.runner-stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.runner-actions{display:flex;gap:8px}
+.active-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:4px}
+.inactive-dot{width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;margin-right:4px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--dark2);border:1px solid rgba(245,166,35,0.3);border-radius:6px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-header h3{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;text-transform:uppercase;letter-spacing:1px}
+.modal-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
+.modal-close:hover{color:var(--white)}
+.modal-body{padding:24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+
+/* FORM ELEMENTS */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-row.full{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+label.fl{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+input.fi,select.fi,textarea.fi{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:3px;padding:10px 13px;color:var(--white);font-family:'Barlow',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+input.fi:focus,select.fi:focus,textarea.fi:focus{border-color:var(--gold)}
+select.fi option{background:#1a1030}
+textarea.fi{resize:vertical;min-height:80px}
+
+/* SECTION HEADER */
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.section-hdr h2{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;text-transform:uppercase;letter-spacing:1px}
+
+/* ALERT FEED */
+.alert-feed{display:flex;flex-direction:column;gap:8px}
+.alert-item{background:var(--dark2);border:1px solid var(--border);border-radius:3px;padding:12px 16px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:border-color .2s}
+.alert-item:hover{border-color:rgba(245,166,35,0.3)}
+.alert-item.unread{border-left:3px solid var(--gold)}
+.alert-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:5px}
+.alert-msg{flex:1;font-size:14px}
+.alert-time{font-size:11px;color:var(--muted);white-space:nowrap}
+
+/* MISC */
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-state .es-icon{font-size:48px;margin-bottom:12px}
+.empty-state p{font-size:14px}
+.divider{height:1px;background:var(--border);margin:20px 0}
+.chip{display:inline-flex;align-items:center;gap:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.5px;text-transform:uppercase;padding:4px 10px;border-radius:2px}
+
+/* MOBILE / TABLET */
+@media(max-width:1024px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .board{grid-template-columns:repeat(5,minmax(220px,1fr));overflow-x:auto;padding-bottom:8px}
+}
+@media(max-width:768px){
+  .app{flex-direction:column;height:auto;min-height:100vh;overflow:visible}
+  .sidebar{width:100%;flex-direction:row;align-items:center;border-right:none;border-bottom:1px solid var(--border);overflow-x:auto}
+  .sidebar-logo{padding:12px 14px;border-bottom:none;border-right:1px solid var(--border);flex-shrink:0}
+  .sidebar-logo img{height:32px;width:32px}
+  .sidebar-logo-text{font-size:13px}
+  nav.sidenav{display:flex;flex:1;padding:0;gap:0;overflow-x:auto;white-space:nowrap}
+  .sidenav a{padding:14px 14px;border-left:none;border-bottom:3px solid transparent;font-size:12px;flex-shrink:0}
+  .sidenav a.active{border-left-color:transparent;border-bottom-color:var(--gold)}
+  .sidenav a .nav-icon{font-size:16px;width:auto}
+  .sidebar-footer{display:none}
+  .main{overflow:visible}
+  .topbar{height:auto;padding:10px 14px;gap:8px;flex-wrap:wrap}
+  .topbar h1{font-size:18px;flex:1 1 auto}
+  .topbar-actions{flex-wrap:wrap;gap:6px}
+  .topbar-actions .btn{padding:7px 12px;font-size:12px}
+  .content{padding:14px;overflow:visible}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+  .stat-card{padding:14px}
+  .stat-value{font-size:32px}
+  .board{grid-template-columns:repeat(5,minmax(78vw,260px));gap:10px}
+  .board-col-body{max-height:none}
+  table{font-size:12px}
+  th,td{padding:9px 10px}
+  .runners-grid{grid-template-columns:1fr;gap:12px}
+  .modal{max-width:100%}
+  .form-row{grid-template-columns:1fr;gap:10px}
+  .section-hdr{flex-wrap:wrap;gap:10px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <img src="logo.png" alt="Pro Task">
+    <h2>Admin Access</h2>
+    <p>Enter your PIN to continue</p>
+    <input type="password" id="pinInput" placeholder="• • • •" maxlength="6" onkeydown="if(event.key==='Enter')checkPin()">
+    <button onclick="checkPin()">Unlock Dashboard</button>
+    <div class="login-err" id="loginErr">Incorrect PIN. Try again.</div>
+    <p style="margin-top:16px;font-size:11px;color:var(--muted)">Default PIN: 1234 (change in Settings)</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="appShell" style="display:none">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <img src="logo.png" alt="Pro Task">
+      <div class="sidebar-logo-text">PRO TASK<span>ADMIN</span></div>
+    </div>
+    <nav class="sidenav">
+      <a onclick="showPanel('dashboard')" class="active" id="nav-dashboard"><span class="nav-icon">📊</span> Dashboard</a>
+      <a onclick="showPanel('jobs')" id="nav-jobs"><span class="nav-icon">📋</span> Jobs Board <span class="badge" id="pendingBadge">0</span></a>
+      <a onclick="showPanel('runners')" id="nav-runners"><span class="nav-icon">🏃</span> Runners</a>
+      <a onclick="showPanel('payments')" id="nav-payments"><span class="nav-icon">💰</span> Payments</a>
+      <a onclick="showPanel('alerts')" id="nav-alerts"><span class="nav-icon">🔔</span> Alerts <span class="badge" id="alertBadge">0</span></a>
+      <a onclick="showPanel('settings')" id="nav-settings"><span class="nav-icon">⚙️</span> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="index.html" target="_blank">🌐 Customer Site</a>
+      <a href="runner.html" target="_blank">🏃 Runner Portal</a>
+      <a onclick="logout()" style="cursor:pointer;color:#ef4444">🔒 Lock</a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <h1 id="panelTitle">Dashboard</h1>
+      <div class="topbar-actions">
+        <button class="btn btn-gold" onclick="openNewJobModal()">+ New Job</button>
+        <a href="tel:+13233842662" class="btn btn-outline">📞 (323) 384-2662</a>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="section-hdr"><h2>Recent Jobs</h2><button class="btn btn-outline btn-sm" onclick="showPanel('jobs')">View All →</button></div>
+        <div class="table-wrap"><table><thead><tr><th>Client</th><th>Service</th><th>Date</th><th>Runner</th><th>Status</th><th>Price</th><th></th></tr></thead><tbody id="recentJobsTable"></tbody></table></div>
+      </div>
+
+      <!-- JOBS BOARD -->
+      <div class="panel" id="panel-jobs">
+        <div class="section-hdr"><h2>Jobs Board</h2><button class="btn btn-gold" onclick="openNewJobModal()">+ New Job</button></div>
+        <div class="board" id="jobsBoard"></div>
+      </div>
+
+      <!-- RUNNERS -->
+      <div class="panel" id="panel-runners">
+        <div class="section-hdr"><h2>Runners</h2><button class="btn btn-gold" onclick="openRunnerModal()">+ Add Runner</button></div>
+        <div class="runners-grid" id="runnersGrid"></div>
+      </div>
+
+      <!-- PAYMENTS -->
+      <div class="panel" id="panel-payments">
+        <div class="section-hdr"><h2>Payments</h2>
+          <button class="btn btn-outline btn-sm" onclick="exportRevenue()">📋 Export Summary</button>
+        </div>
+        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)" id="paymentStats"></div>
+        <div class="table-wrap"><table><thead><tr><th>Job ID</th><th>Client</th><th>Service</th><th>Date</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead><tbody id="paymentsTable"></tbody></table></div>
+      </div>
+
+      <!-- ALERTS -->
+      <div class="panel" id="panel-alerts">
+        <div class="section-hdr"><h2>Notifications</h2><button class="btn btn-outline btn-sm" onclick="PTRS.clearAlerts();renderAlerts()">Clear All</button></div>
+        <div class="alert-feed" id="alertFeed"></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="panel" id="panel-settings">
+        <div class="section-hdr"><h2>Settings</h2></div>
+        <div style="max-width:480px">
+          <div class="table-wrap" style="padding:24px">
+            <div class="form-row"><div class="form-group"><label class="fl">New Admin PIN</label><input class="fi" type="password" id="newPin" placeholder="Enter new PIN" maxlength="6"></div><div class="form-group"><label class="fl">Confirm PIN</label><input class="fi" type="password" id="confirmPin" placeholder="Confirm PIN" maxlength="6"></div></div>
+            <button class="btn btn-gold" onclick="changePin()">Save PIN</button>
+            <div class="divider"></div>
+            <div class="form-row full"><div class="form-group"><label class="fl">QuickBooks Payment Link</label><input class="fi" type="text" id="qbLink" placeholder="https://quickbooks.intuit.com/..." ><small style="color:var(--muted);font-size:11px;margin-top:4px">Paste your QuickBooks payment link here. It will be sent to the client via WhatsApp when you click "Send Invoice".</small></div></div>
+            <button class="btn btn-gold" style="margin-top:10px" onclick="saveQbLink()">Save</button>
+            <div class="divider"></div>
+            <button class="btn btn-red btn-sm" onclick="if(confirm('Reset ALL data?')){localStorage.clear();location.reload()}">🗑️ Reset All Data</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- JOB MODAL -->
+<div class="modal-overlay" id="jobModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="jobModalTitle">New Job</h3>
+      <button class="modal-close" onclick="closeModal('jobModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editJobId">
+      <div class="form-row">
+        <div class="form-group"><label class="fl">Client Name *</label><input class="fi" id="jClientName" placeholder="John Smith"></div>
+        <div class="form-group"><label class="fl">Client Phone *</label><input class="fi" id="jClientPhone" placeholder="(818) 555-0000"></div>
+      </div>
+      <div class="form-row full"><div class="form-group"><label class="fl">Client Email</label><input class="fi" type="email" id="jClientEmail" placeholder="client@company.com"></div></div>
+      <div class="form-row full"><div class="form-group"><label class="fl">Service *</label>
+        <select class="fi" id="jService"></select>
+      </div></div>
+      <div class="form-row">
+        <div class="form-group"><label class="fl">Pickup Location</label><input class="fi" id="jPickup" placeholder="Address or store"></div>
+        <div class="form-group"><label class="fl">Destination</label><input class="fi" id="jDestination" placeholder="Delivery address"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="fl">Date</label><input class="fi" type="date" id="jDate"></div>
+        <div class="form-group"><label class="fl">Time</label>
+          <select class="fi" id="jTime"><option>Any time</option><option>Morning (7am–12pm)</option><option>Afternoon (12pm–5pm)</option><option>Evening (5pm–9pm)</option><option>ASAP / Same Day</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="fl">Assign Runner</label><select class="fi" id="jRunner"><option value="">Unassigned</option></select></div>
+        <div class="form-group"><label class="fl">Price ($)</label><input class="fi" type="number" id="jPrice" placeholder="150"></div>
+      </div>
+      <div class="form-row full"><div class="form-group"><label class="fl">Status</label>
+        <select class="fi" id="jStatus"><option value="pending">Pending</option><option value="assigned">Assigned</option><option value="inprogress">In Progress</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select>
+      </div></div>
+      <div class="form-row full"><div class="form-group"><label class="fl">Notes</label><textarea class="fi" id="jNotes" placeholder="Special instructions..."></textarea></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('jobModal')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveJobFromModal()">Save Job</button>
+    </div>
+  </div>
+</div>
+
+<!-- RUNNER MODAL -->
+<div class="modal-overlay" id="runnerModal">
+  <div class="modal">
+    <div class="modal-header"><h3>Add Runner</h3><button class="modal-close" onclick="closeModal('runnerModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="fl">Full Name *</label><input class="fi" id="rName" placeholder="Alex Rivera"></div>
+        <div class="form-group"><label class="fl">Phone *</label><input class="fi" id="rPhone" placeholder="(747) 555-0000"></div>
+      </div>
+      <div class="form-row full"><div class="form-group"><label class="fl">Status</label>
+        <select class="fi" id="rActive"><option value="true">Active</option><option value="false">Inactive</option></select>
+      </div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('runnerModal')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveRunnerFromModal()">Save Runner</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+// ── Auth ──────────────────────────────────────────────────
+function checkPin(){
+  const pin = document.getElementById('pinInput').value;
+  const stored = PTRS.getSettings().adminPin || '1234';
+  if(pin === stored){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('appShell').style.display='flex';
+    PTRS.seedDemoData();
+    renderAll();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+    document.getElementById('pinInput').value='';
+  }
+}
+function logout(){document.getElementById('loginScreen').style.display='flex';document.getElementById('appShell').style.display='none';}
+function changePin(){
+  const p1=document.getElementById('newPin').value, p2=document.getElementById('confirmPin').value;
+  if(!p1||p1.length<4){return alert('PIN must be at least 4 digits');}
+  if(p1!==p2){return alert('PINs do not match');}
+  PTRS.saveSetting('adminPin',p1); alert('PIN updated!');
+}
+function saveQbLink(){PTRS.saveSetting('qbLink',document.getElementById('qbLink').value);alert('Saved!');}
+
+// ── Nav ───────────────────────────────────────────────────
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidenav a').forEach(a=>a.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  const titles={dashboard:'Dashboard',jobs:'Jobs Board',runners:'Runners',payments:'Payments & Revenue',alerts:'Notifications',settings:'Settings'};
+  document.getElementById('panelTitle').textContent=titles[name]||name;
+  renderPanel(name);
+}
+
+function renderPanel(name){
+  if(name==='dashboard') renderDashboard();
+  else if(name==='jobs') renderBoard();
+  else if(name==='runners') renderRunners();
+  else if(name==='payments') renderPayments();
+  else if(name==='alerts') renderAlerts();
+  else if(name==='settings') renderSettings();
+}
+
+function renderSettings(){
+  const s=PTRS.getSettings();
+  const el=document.getElementById('qbLink');
+  if(el) el.value=s.qbLink||'';
+}
+
+function renderAll(){
+  updateBadges();
+  renderDashboard();
+}
+
+function updateBadges(){
+  document.getElementById('pendingBadge').textContent = PTRS.getJobsByStatus('pending').length;
+  const uc = PTRS.unreadAlertCount();
+  document.getElementById('alertBadge').textContent = uc;
+  document.getElementById('alertBadge').style.display = uc?'inline':'none';
+}
+
+// ── Dashboard ─────────────────────────────────────────────
+function renderDashboard(){
+  const s=PTRS.getStats();
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stat-card gold"><div class="stat-label">Pending Jobs</div><div class="stat-value" style="color:var(--gold)">${s.pending}</div><div class="stat-sub">Awaiting assignment</div></div>
+    <div class="stat-card green"><div class="stat-label">This Month</div><div class="stat-value" style="color:var(--green)">${s.monthJobs}</div><div class="stat-sub">Jobs completed</div></div>
+    <div class="stat-card blue"><div class="stat-label">Revenue (Month)</div><div class="stat-value" style="color:#3b82f6">$${s.monthRevenue.toLocaleString()}</div><div class="stat-sub">${s.unpaidJobs} unpaid</div></div>
+    <div class="stat-card purple"><div class="stat-label">Active Runners</div><div class="stat-value" style="color:#c084fc">${s.activeRunners}</div><div class="stat-sub">Top: ${s.topService.substring(0,18)}</div></div>
+  `;
+  const jobs=PTRS.getJobs().slice(0,8);
+  document.getElementById('recentJobsTable').innerHTML = jobs.length ? jobs.map(j=>jobRow(j)).join('') : `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">No jobs yet</td></tr>`;
+  updateBadges();
+}
+
+function jobRow(j){
+  const runner=j.runnerId?PTRS.getRunner(j.runnerId):null;
+  const st=PTRS.STATUS[j.status]||PTRS.STATUS.pending;
+  return `<tr>
+    <td><strong>${j.clientName}</strong><br><span style="color:var(--muted);font-size:11px">${j.clientPhone}</span></td>
+    <td style="font-size:12px">${j.service}</td>
+    <td style="font-size:12px;color:var(--muted)">${j.date||'—'}</td>
+    <td style="font-size:12px">${runner?runner.name:'<span style="color:var(--muted)">Unassigned</span>'}</td>
+    <td><span class="chip" style="background:${st.bg};color:${st.color}">${st.label}</span></td>
+    <td style="font-weight:700;color:var(--gold)">${j.price?'$'+j.price:'—'}</td>
+    <td><button class="btn btn-outline btn-sm" onclick="editJob('${j.id}')">Edit</button></td>
+  </tr>`;
+}
+
+// ── Board ─────────────────────────────────────────────────
+function renderBoard(){
+  const statuses=['pending','assigned','inprogress','completed','cancelled'];
+  const all=PTRS.getJobs();
+  document.getElementById('jobsBoard').innerHTML=statuses.map(s=>{
+    const jobs=all.filter(j=>j.status===s);
+    const st=PTRS.STATUS[s];
+    return `<div class="board-col">
+      <div class="board-col-header"><span class="board-col-title" style="color:${st.color}">${st.label}</span><span class="col-count">${jobs.length}</span></div>
+      <div class="board-col-body">${jobs.length?jobs.map(j=>jobCard(j)).join(''):'<div class="empty-state" style="padding:20px"><div class="es-icon" style="font-size:28px">📭</div><p>Empty</p></div>'}</div>
+    </div>`;
+  }).join('');
+  updateBadges();
+}
+
+function jobCard(j){
+  const runner=j.runnerId?PTRS.getRunner(j.runnerId):null;
+  return `<div class="job-card" onclick="editJob('${j.id}')">
+    <div class="job-card-service">${PTRS.SERVICES.find(s=>s.label===j.service)?.icon||'📋'} ${j.service}</div>
+    <div class="job-card-client">${j.clientName}</div>
+    <div class="job-card-meta">${j.clientPhone}<br>${j.date||''} ${j.time?'· '+j.time:''}<br>${runner?'👤 '+runner.name:'⚠️ Unassigned'}</div>
+    <div class="job-card-footer">
+      <span style="font-size:11px;color:var(--muted)">${j.id}</span>
+      <span style="font-weight:700;color:var(--gold)">${j.price?'$'+j.price:''}</span>
+    </div>
+  </div>`;
+}
+
+// ── Runners ───────────────────────────────────────────────
+function renderRunners(){
+  const runners=PTRS.getRunners();
+  if(!runners.length){document.getElementById('runnersGrid').innerHTML=`<div class="empty-state"><div class="es-icon">🏃</div><p>No runners yet. Add your first runner!</p></div>`;return;}
+  document.getElementById('runnersGrid').innerHTML=runners.map(r=>{
+    const jobs=PTRS.getJobsByRunner(r.id);
+    const active=jobs.filter(j=>['assigned','inprogress'].includes(j.status)).length;
+    return `<div class="runner-card">
+      <div class="runner-card-header">
+        <div class="runner-avatar">${r.name[0]}</div>
+        <div><div class="runner-name">${r.name}</div><div class="runner-phone"><span class="${r.active?'active-dot':'inactive-dot'}"></span>${r.active?'Active':'Inactive'}</div></div>
+      </div>
+      <div class="runner-stats">
+        <div class="runner-stat"><div class="runner-stat-val">${active}</div><div class="runner-stat-lbl">Active</div></div>
+        <div class="runner-stat"><div class="runner-stat-val">${r.jobsCompleted||0}</div><div class="runner-stat-lbl">Done</div></div>
+        <div class="runner-stat"><div class="runner-stat-val">${jobs.length}</div><div class="runner-stat-lbl">Total</div></div>
+      </div>
+      <div class="runner-actions">
+        <a href="tel:${r.phone}" class="btn btn-outline btn-sm">📞 Call</a>
+        <a href="${PTRS.waLink(r.phone,'Hi '+r.name+', this is Pro Task Runner Services.')}" target="_blank" class="btn btn-green btn-sm">💬 WA</a>
+        <button class="btn btn-red btn-sm" onclick="deleteRunner('${r.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Payments ──────────────────────────────────────────────
+function renderPayments(){
+  const s=PTRS.getStats();
+  document.getElementById('paymentStats').innerHTML=`
+    <div class="stat-card green"><div class="stat-label">Total Revenue</div><div class="stat-value" style="color:var(--green)">$${s.totalRevenue.toLocaleString()}</div><div class="stat-sub">${s.completed} completed jobs</div></div>
+    <div class="stat-card gold"><div class="stat-label">This Month</div><div class="stat-value" style="color:var(--gold)">$${s.monthRevenue.toLocaleString()}</div><div class="stat-sub">${s.monthJobs} jobs</div></div>
+    <div class="stat-card"><div class="stat-label">Unpaid</div><div class="stat-value" style="color:#ef4444">${s.unpaidJobs}</div><div class="stat-sub">Awaiting payment</div></div>
+  `;
+  const completed=PTRS.getJobs().filter(j=>['completed','assigned','inprogress'].includes(j.status));
+  document.getElementById('paymentsTable').innerHTML=completed.length?completed.map(j=>`<tr>
+    <td style="font-size:11px;color:var(--muted)">${j.id}</td>
+    <td><strong>${j.clientName}</strong></td>
+    <td style="font-size:12px">${j.service}</td>
+    <td style="font-size:12px;color:var(--muted)">${j.date||'—'}</td>
+    <td style="font-weight:700;color:var(--gold)">${j.price?'$'+j.price:'—'}</td>
+    <td>${j.paid?'<span class="chip" style="background:rgba(34,197,94,0.15);color:#22c55e">✓ Paid</span>':'<span class="chip" style="background:rgba(239,68,68,0.1);color:#ef4444">Unpaid</span>'}</td>
+    <td style="display:flex;gap:6px;flex-wrap:wrap">
+      ${!j.paid?`<button class="btn btn-green btn-sm" onclick="markPaid('${j.id}')">✓ Mark Paid</button>`:''}
+      <button class="btn btn-blue btn-sm" onclick="sendInvoice('${j.id}')">💳 Send Invoice</button>
+    </td>
+  </tr>`).join(''):`<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">No payment records yet</td></tr>`;
+}
+
+function markPaid(id){PTRS.updateJob(id,{paid:true});renderPayments();}
+function sendInvoice(id){
+  const j=PTRS.getJob(id);
+  if(!j) return;
+  const link=(PTRS.getSettings().qbLink||'').trim();
+  if(!link){
+    alert('Add your QuickBooks payment link in Settings first.');
+    showPanel('settings');
+    return;
+  }
+  const msg=`Hi ${j.clientName}, your job is complete!\n\n`+
+    `🔧 ${j.service}\n`+
+    `🆔 ${j.id}\n`+
+    `💰 Total: $${j.price||'TBD'}\n\n`+
+    `💳 Pay here: ${link}\n\n`+
+    `Thank you for choosing Pro Task Runner Services!`;
+  window.open(PTRS.waLink(j.clientPhone,msg),'_blank');
+}
+
+function exportRevenue(){
+  const s=PTRS.getStats();
+  const jobs=PTRS.getJobs().filter(j=>j.status==='completed');
+  const text=`PRO TASK RUNNER SERVICES — Revenue Summary\n${new Date().toLocaleDateString()}\n\n`+
+    `Total Revenue: $${s.totalRevenue}\nThis Month: $${s.monthRevenue}\nCompleted Jobs: ${s.completed}\nUnpaid: ${s.unpaidJobs}\n\n`+
+    `JOBS:\n`+jobs.map(j=>`${j.date||'—'} | ${j.clientName} | ${j.service} | $${j.price||0} | ${j.paid?'PAID':'UNPAID'}`).join('\n');
+  navigator.clipboard.writeText(text).then(()=>alert('Copied to clipboard!'));
+}
+
+// ── Alerts ────────────────────────────────────────────────
+function renderAlerts(){
+  const alerts=PTRS.getAlerts();
+  document.getElementById('alertFeed').innerHTML=alerts.length?alerts.map(a=>`
+    <div class="alert-item ${a.read?'':'unread'}" onclick="PTRS.markAlertRead('${a.id}');this.classList.remove('unread');document.querySelector('.alert-item .alert-dot') && this.querySelector('.alert-dot')?.remove()">
+      ${!a.read?'<div class="alert-dot"></div>':''}
+      <div class="alert-msg">${a.message}</div>
+      <div class="alert-time">${PTRS.formatDate(a.ts)} ${PTRS.formatTime(a.ts)}</div>
+    </div>`).join(''):`<div class="empty-state"><div class="es-icon">🔔</div><p>No notifications</p></div>`;
+  updateBadges();
+}
+
+// ── Job Modal ─────────────────────────────────────────────
+function openNewJobModal(){
+  document.getElementById('jobModalTitle').textContent='New Job';
+  document.getElementById('editJobId').value='';
+  ['jClientName','jClientPhone','jClientEmail','jPickup','jDestination','jDate','jNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('jPrice').value='';
+  // Reset status & time to defaults for a fresh job
+  document.getElementById('jStatus').value='pending';
+  document.getElementById('jTime').value='Any time';
+  populateJobModalDropdowns();
+  document.getElementById('jobModal').classList.add('open');
+}
+
+function editJob(id){
+  const j=PTRS.getJob(id); if(!j) return;
+  document.getElementById('jobModalTitle').textContent='Edit Job';
+  document.getElementById('editJobId').value=id;
+  document.getElementById('jClientName').value=j.clientName||'';
+  document.getElementById('jClientPhone').value=j.clientPhone||'';
+  document.getElementById('jClientEmail').value=j.clientEmail||'';
+  document.getElementById('jPickup').value=j.pickup||'';
+  document.getElementById('jDestination').value=j.destination||'';
+  document.getElementById('jDate').value=j.date||'';
+  document.getElementById('jNotes').value=j.notes||'';
+  document.getElementById('jPrice').value=j.price||'';
+  populateJobModalDropdowns(j);
+  document.getElementById('jobModal').classList.add('open');
+}
+
+function populateJobModalDropdowns(j){
+  const svc=document.getElementById('jService');
+  svc.innerHTML=PTRS.SERVICES.map(s=>`<option value="${s.label}" ${j&&j.service===s.label?'selected':''}>${s.icon} ${s.label}</option>`).join('');
+  const rnr=document.getElementById('jRunner');
+  rnr.innerHTML=`<option value="">Unassigned</option>`+PTRS.getRunners().filter(r=>r.active).map(r=>`<option value="${r.id}" ${j&&j.runnerId===r.id?'selected':''}>${r.name}</option>`).join('');
+  if(j){
+    document.getElementById('jStatus').value=j.status||'pending';
+    document.getElementById('jTime').value=j.time||'Any time';
+  }
+}
+
+function saveJobFromModal(){
+  const name=document.getElementById('jClientName').value.trim();
+  const phone=document.getElementById('jClientPhone').value.trim();
+  if(!name||!phone){return alert('Name and phone are required.');}
+  const id=document.getElementById('editJobId').value;
+  const runnerId=document.getElementById('jRunner').value;
+  const status=document.getElementById('jStatus').value;
+  const job={
+    id:id||undefined,
+    clientName:name, clientPhone:phone,
+    clientEmail:document.getElementById('jClientEmail').value.trim(),
+    service:document.getElementById('jService').value,
+    pickup:document.getElementById('jPickup').value,
+    destination:document.getElementById('jDestination').value,
+    date:document.getElementById('jDate').value,
+    time:document.getElementById('jTime').value,
+    notes:document.getElementById('jNotes').value,
+    price:parseFloat(document.getElementById('jPrice').value)||null,
+    runnerId:runnerId||null,
+    status: runnerId&&status==='pending'?'assigned':status,
+  };
+  const saved=PTRS.saveJob(job);
+  // Notify runner via WA if assigned
+  if(runnerId){
+    const runner=PTRS.getRunner(runnerId);
+    if(runner&&confirm(`Send WhatsApp assignment to ${runner.name}?`)){
+      window.open(PTRS.waLink(runner.phone, PTRS.waRunnerAssignment(saved,runner)),'_blank');
+    }
+  }
+  closeModal('jobModal');
+  renderAll();
+  const panel=document.querySelector('.panel.active').id.replace('panel-','');
+  renderPanel(panel);
+}
+
+function openRunnerModal(){document.getElementById('runnerModal').classList.add('open');}
+function saveRunnerFromModal(){
+  const name=document.getElementById('rName').value.trim();
+  const phone=document.getElementById('rPhone').value.trim();
+  if(!name||!phone){return alert('Name and phone required.');}
+  PTRS.saveRunner({name,phone,active:document.getElementById('rActive').value==='true'});
+  closeModal('runnerModal');
+  document.getElementById('rName').value='';document.getElementById('rPhone').value='';
+  renderRunners();
+}
+function deleteRunner(id){if(confirm('Remove this runner?')){PTRS.deleteRunner(id);renderRunners();}}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+</script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Runner Portal — Pro Task Runner Services</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --purple:#3d1e6d;--purple-mid:#5a2d9c;
+  --gold:#f5a623;--gold-dark:#c8841a;
+  --dark:#0d0b14;--dark2:#13101e;--dark3:#1a1630;
+  --white:#fff;--muted:rgba(255,255,255,0.55);
+  --border:rgba(255,255,255,0.08);
+  --green:#22c55e;--blue:#3b82f6;--red:#ef4444;
+}
+body{font-family:'Barlow',sans-serif;background:var(--dark);color:var(--white);min-height:100vh}
+
+/* LOGIN */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#08060f,#1a0a3a)}
+.login-box{background:var(--dark2);border:1px solid rgba(245,166,35,0.3);border-radius:8px;padding:40px 32px;width:100%;max-width:360px;text-align:center}
+.login-box img{height:70px;margin-bottom:16px}
+.login-box h2{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;margin-bottom:4px}
+.login-box p{color:var(--muted);font-size:13px;margin-bottom:24px}
+.login-box input{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:3px;padding:13px 16px;color:var(--white);font-size:16px;outline:none;margin-bottom:14px;text-align:center;letter-spacing:2px}
+.login-box input:focus{border-color:var(--gold)}
+.login-box button{width:100%;background:var(--gold);color:var(--dark);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;letter-spacing:2px;text-transform:uppercase;border:none;padding:14px;border-radius:3px;cursor:pointer}
+.login-err{color:#ef4444;font-size:13px;margin-top:10px;display:none}
+
+/* APP */
+#appShell{display:none;flex-direction:column;min-height:100vh}
+
+/* HEADER */
+.runner-header{background:var(--dark2);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;gap:10px}
+.runner-header-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.runner-header img{height:36px;width:36px;object-fit:contain;flex-shrink:0}
+.runner-name-display{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;min-width:0}
+.runner-name-display span{color:var(--gold);display:block;font-size:10px;letter-spacing:2px;font-weight:600}
+.runner-header-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.active-indicator{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green)}
+.active-indicator::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block}
+.signout-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 10px;border-radius:3px;cursor:pointer}
+.signout-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--dark2)}
+.tab{flex:1;padding:13px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(245,166,35,0.05)}
+.tab-badge{background:var(--gold);color:var(--dark);font-size:10px;font-weight:800;padding:1px 6px;border-radius:8px;margin-left:4px}
+
+/* CONTENT */
+.runner-content{padding:16px;max-width:600px;margin:0 auto;width:100%}
+
+/* JOB CARDS — MOBILE FIRST */
+.job-list{display:flex;flex-direction:column;gap:14px}
+
+.job-card{background:var(--dark2);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.job-card-top{padding:16px;border-bottom:1px solid var(--border)}
+.job-card-status-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.status-pill{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-radius:20px}
+.job-id{font-size:10px;color:var(--muted);letter-spacing:1px}
+.job-service{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.job-service-icon{font-size:22px;margin-right:6px}
+.job-datetime{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:4px}
+
+.job-card-locations{padding:14px 16px;background:rgba(0,0,0,0.2);display:flex;flex-direction:column;gap:10px}
+.location-row{display:flex;align-items:flex-start;gap:10px}
+.loc-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:2px}
+.loc-pickup{background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3)}
+.loc-dest{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2)}
+.loc-text strong{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block}
+.loc-text span{font-size:14px;line-height:1.4}
+
+.job-card-client{padding:12px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.client-info strong{font-size:15px;display:block}
+.client-info span{font-size:12px;color:var(--muted)}
+.client-actions{display:flex;gap:8px}
+
+.job-card-notes{padding:10px 16px;background:rgba(245,166,35,0.05);border-top:1px solid rgba(245,166,35,0.1);font-size:13px;color:rgba(255,255,255,0.7);line-height:1.5}
+.job-card-notes::before{content:'📝 ';font-size:12px}
+
+.job-card-actions{padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:10px}
+
+/* BUTTONS */
+.btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:10px 18px;border-radius:3px;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;flex:1}
+.btn-gold{background:var(--gold);color:var(--dark)}
+.btn-gold:hover{background:var(--gold-dark)}
+.btn-green{background:rgba(34,197,94,0.15);color:var(--green);border:1px solid rgba(34,197,94,0.3)}
+.btn-outline{background:transparent;color:var(--white);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-blue{background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.3)}
+.btn-sm{padding:8px 14px;font-size:12px;flex:none}
+.btn-icon{width:38px;height:38px;padding:0;flex:none;border-radius:50%}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-icon{font-size:52px;margin-bottom:12px}
+.empty-state p{font-size:14px;line-height:1.6}
+
+/* COMPLETED JOB - dimmed */
+.job-card.done{opacity:0.6}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--dark2);border-top:1px solid var(--border);display:flex;padding:8px 0 env(safe-area-inset-bottom)}
+.bottom-nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:6px 0;cursor:pointer;transition:color .2s}
+.bottom-nav a.active{color:var(--gold)}
+.bottom-nav a .nav-emoji{font-size:20px}
+
+.pb-safe{height:80px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <img src="logo.png" alt="Pro Task">
+    <h2>Runner Login</h2>
+    <p>Enter your phone number to access your jobs</p>
+    <input type="tel" id="runnerPhone" placeholder="(323) 000-0000" onkeydown="if(event.key==='Enter')runnerLogin()">
+    <button onclick="runnerLogin()">Access My Jobs</button>
+    <div class="login-err" id="loginErr">Phone not found. Contact Lauren at (323) 384-2662</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appShell">
+  <div class="runner-header">
+    <div class="runner-header-left">
+      <img src="logo.png" alt="Pro Task">
+      <div class="runner-name-display">
+        <span>RUNNER PORTAL</span>
+        <span id="runnerDisplayName" style="font-size:15px;color:var(--white);letter-spacing:0">—</span>
+      </div>
+    </div>
+    <div class="runner-header-right">
+      <div class="active-indicator">On Duty</div>
+      <button class="signout-btn" onclick="signOut()" title="Sign out">⎋ Sign Out</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-today" onclick="showTab('today')">Today <span class="tab-badge" id="todayCount">0</span></div>
+    <div class="tab" id="tab-upcoming" onclick="showTab('upcoming')">Upcoming</div>
+    <div class="tab" id="tab-done" onclick="showTab('done')">Completed</div>
+  </div>
+
+  <div class="runner-content">
+    <div id="tab-today-content"></div>
+    <div id="tab-upcoming-content" style="display:none"></div>
+    <div id="tab-done-content" style="display:none"></div>
+  </div>
+
+  <div class="pb-safe"></div>
+
+  <div class="bottom-nav">
+    <a onclick="showTab('today')" id="bnav-today" class="active"><span class="nav-emoji">📋</span>Today</a>
+    <a onclick="showTab('upcoming')" id="bnav-upcoming"><span class="nav-emoji">📅</span>Upcoming</a>
+    <a onclick="showTab('done')" id="bnav-done"><span class="nav-emoji">✅</span>Done</a>
+    <a href="tel:+13233842662"><span class="nav-emoji">📞</span>Lauren</a>
+    <a href="https://wa.me/13233842662" target="_blank"><span class="nav-emoji">💬</span>WA</a>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+let currentRunner = null;
+
+function runnerLogin(){
+  const phone = document.getElementById('runnerPhone').value.trim();
+  if(!phone){ alert('Enter your phone number'); return; }
+  // Try demo seed first
+  PTRS.seedDemoData();
+  const runner = PTRS.getRunnerByPhone(phone);
+  if(!runner){
+    document.getElementById('loginErr').style.display='block';
+    return;
+  }
+  currentRunner = runner;
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('appShell').style.display='flex';
+  document.getElementById('appShell').style.flexDirection='column';
+  document.getElementById('runnerDisplayName').textContent = runner.name;
+  renderAll();
+}
+
+function showTab(name){
+  ['today','upcoming','done'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('active', t===name);
+    document.getElementById('tab-'+t+'-content').style.display = t===name?'block':'none';
+    const bn=document.getElementById('bnav-'+t);
+    if(bn) bn.classList.toggle('active', t===name);
+  });
+}
+
+function renderAll(){
+  const jobs = PTRS.getJobsByRunner(currentRunner.id);
+  const today = new Date().toISOString().slice(0,10);
+
+  const todayJobs     = jobs.filter(j => j.date===today && !['completed','cancelled'].includes(j.status));
+  const upcomingJobs  = jobs.filter(j => j.date>today  && !['completed','cancelled'].includes(j.status));
+  const doneJobs      = jobs.filter(j => ['completed','cancelled'].includes(j.status));
+
+  document.getElementById('todayCount').textContent = todayJobs.length;
+
+  document.getElementById('tab-today-content').innerHTML    = renderJobList(todayJobs, 'No jobs scheduled for today.');
+  document.getElementById('tab-upcoming-content').innerHTML = renderJobList(upcomingJobs, 'No upcoming jobs.');
+  document.getElementById('tab-done-content').innerHTML     = renderJobList(doneJobs, 'No completed jobs yet.', true);
+}
+
+function renderJobList(jobs, emptyMsg, done=false){
+  if(!jobs.length) return `<div class="empty-state"><div class="empty-icon">${done?'✅':'🎉'}</div><p>${emptyMsg}</p></div>`;
+  return `<div class="job-list" style="margin-top:16px">${jobs.map(j=>renderJobCard(j,done)).join('')}</div>`;
+}
+
+function renderJobCard(j, done=false){
+  const st = PTRS.STATUS[j.status]||PTRS.STATUS.pending;
+  const svc = PTRS.SERVICES.find(s=>s.label===j.service)||{icon:'📋'};
+  return `<div class="job-card${done?' done':''}">
+    <div class="job-card-top">
+      <div class="job-card-status-row">
+        <span class="status-pill" style="background:${st.bg};color:${st.color}">${st.label}</span>
+        <span class="job-id">${j.id}</span>
+      </div>
+      <div class="job-service"><span class="job-service-icon">${svc.icon}</span>${j.service}</div>
+      <div class="job-datetime">📅 ${j.date||'Date TBD'} &nbsp;·&nbsp; 🕐 ${j.time||'Flexible'}</div>
+    </div>
+
+    ${(j.pickup||j.destination)?`
+    <div class="job-card-locations">
+      ${j.pickup?`<div class="location-row">
+        <div class="loc-icon loc-pickup">📦</div>
+        <div class="loc-text"><strong>Pickup</strong><span>${j.pickup}</span></div>
+        ${j.pickup?`<a href="${PTRS.mapsLink(j.pickup)}" target="_blank" class="btn btn-outline btn-sm" style="margin-left:auto">🗺️</a>`:''}
+      </div>`:''}
+      ${j.destination?`<div class="location-row">
+        <div class="loc-icon loc-dest">📍</div>
+        <div class="loc-text"><strong>Destination</strong><span>${j.destination}</span></div>
+        ${j.destination?`<a href="${PTRS.mapsLink(j.destination)}" target="_blank" class="btn btn-green btn-sm" style="margin-left:auto">Nav</a>`:''}
+      </div>`:''}
+    </div>`:''}
+
+    <div class="job-card-client">
+      <div class="client-info">
+        <strong>${j.clientName}</strong>
+        <span>${j.clientPhone}</span>
+      </div>
+      <div class="client-actions">
+        <a href="tel:${j.clientPhone}" class="btn btn-outline btn-sm btn-icon" title="Call">📞</a>
+        <a href="${PTRS.waLink(j.clientPhone,'Hi '+j.clientName+', this is your runner from Pro Task Runner Services. I\'m on my way!')}" target="_blank" class="btn btn-green btn-sm btn-icon" title="WhatsApp">💬</a>
+      </div>
+    </div>
+
+    ${j.notes?`<div class="job-card-notes">${j.notes}</div>`:''}
+
+    ${!done?`<div class="job-card-actions">
+      ${j.status==='assigned'?`<button class="btn btn-gold" onclick="startJob('${j.id}')">▶ Start Job</button>`:''}
+      ${j.status==='inprogress'?`<button class="btn btn-green" onclick="completeJob('${j.id}')">✓ Mark Complete</button>`:''}
+      ${j.status==='assigned'?`<button class="btn btn-outline" onclick="notifyOnWay('${j.id}')">📍 Notify On Way</button>`:''}
+    </div>`:''}
+  </div>`;
+}
+
+function startJob(id){
+  PTRS.updateJob(id,{status:'inprogress'});
+  // Notify admin via alert
+  const j=PTRS.getJob(id);
+  PTRS.addAlert(`${currentRunner.name} started job ${id} for ${j?.clientName}`,'runner',id);
+  renderAll();
+}
+
+function completeJob(id){
+  if(!confirm('Mark this job as completed?')) return;
+  PTRS.updateJob(id,{status:'completed',updatedAt:Date.now()});
+  // Bump runner completed count
+  const r=PTRS.getRunner(currentRunner.id);
+  if(r){ r.jobsCompleted=(r.jobsCompleted||0)+1; PTRS.saveRunner(r); }
+  PTRS.addAlert(`✅ ${currentRunner.name} completed job ${id}`,'complete',id);
+  renderAll();
+  showTab('done');
+}
+
+function notifyOnWay(id){
+  const j=PTRS.getJob(id);
+  if(!j) return;
+  window.open(PTRS.waLink(j.clientPhone,`Hi ${j.clientName}! Your runner from Pro Task Runner Services is on the way to ${j.pickup||'your location'}. ETA soon. Questions? Call (323) 384-2662`),'_blank');
+}
+
+function signOut(){
+  if(!confirm('Sign out of the runner portal?')) return;
+  currentRunner=null;
+  document.getElementById('appShell').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('runnerPhone').value='';
+  document.getElementById('loginErr').style.display='none';
+}
+</script>
+</body>
+</html>
